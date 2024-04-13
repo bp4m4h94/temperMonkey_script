@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         GitLab Custom Sidebar Dropdown
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Append a dropdown of repositories to the GitLab sidebar
 // @author       Ryan Tsai
 // @match        https://gitlab.kazan.myworldline.com/*
-// @grant        none
+// @grant        GM_addStyle
 // ==/UserScript==
 
 (function() {
@@ -22,6 +22,27 @@
         {name: 'optimus-gui-v2', url: '/apac-e2e-optimus/optimus-gui-v2'}
     ];
 
+    GM_addStyle(`
+        /* Custom styles for the dropdown */
+        .custom-sidebar-select {
+            border-radius: 4px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+            transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+            border: 1px solid #ccc;
+            display: block; /* to overwrite any existing 'display' property */
+            padding: 6px 12px; /* Define your padding or use GitLab defaults */
+            background-clip: padding-box;
+        }
+        .custom-sidebar-select:focus {
+            border-color: #66afe9;
+            outline: 0;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+        }
+        .custom-sidebar-select:not([size]):not([multiple]) {
+            height: calc(2.25rem + 2px); /* Adjust height to fit the theme */
+        }
+    `);
+
     // Wait for the sidebar to load
     const intervalId = setInterval(function () {
         const sidebarList = document.querySelector('[data-testid="non-static-items-section"]');
@@ -29,8 +50,7 @@
             clearInterval(intervalId);
             // Create the select element
             const select = document.createElement('select');
-            select.className = 'gl-form-input gl-mb-3';
-            select.style.width = '100%';
+            select.className = 'gl-form-input gl-mb-3 custom-sidebar-select'; // Add custom class here
             select.innerHTML = `<option value="">Select most used repository...</option>`;
             repositories.forEach(repo => {
                 const option = document.createElement('option');
